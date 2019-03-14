@@ -47,8 +47,9 @@ if __name__ == '__main__':
     directory = os.path.join('.', 'data')
 
     scenario_no = 1
+    total_scenarios = 1
 
-    while scenario_no < 5:
+    while scenario_no <= total_scenarios:
         filename_format = str(scenario_no) + "-*"
         file_paths = glob.glob(os.path.join(directory, filename_format))
         list_len = len(file_paths)
@@ -66,12 +67,14 @@ if __name__ == '__main__':
 
             csvfile.close()
 
-        minimum_cycle_number = min(number_of_lines) - 1
+        minimum_cycle_number = min(number_of_lines) - 2
 
         running_times = []
         achieved_percentages = []
         feedbacks = []
         difference_ratios = []
+        variances = []
+        standard_deviations = []
 
         # read csv files
         for filepath in file_paths:
@@ -80,23 +83,34 @@ if __name__ == '__main__':
             achieved_percentage = []
             feedback = []
             difference_ratio = []
+            variance = None
+            standard_deviation = None
+
             with open(filepath, 'r', newline='') as csvfile:
                 reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
                 for row in reader:
-                    if line_number != 1:
+                    if line_number == 1:
+                        arr = ', '.join(row).split(',')
+                        running_times.append(float(arr[2]))
+                        line_number += 1
+                    elif line_number == 2:
+                        arr = ', '.join(row).split(',')
+                        variance = float(arr[0])
+                        standard_deviation = float(arr[1])
+                        line_number += 1
+                    else:
                         arr = ', '.join(row).split(',')
                         achieved_percentage.append(float(arr[1]))
                         feedback.append(float(arr[3]))
                         difference_ratio.append(float(arr[4]))
                         line_number += 1
-                    else:
-                        arr = ', '.join(row).split(',')
-                        running_times.append(float(arr[2]))
-                        line_number += 1
-            # split a list 0 ~ 73 because number of cycles are different due to processing time.
+
+            # split a list based on minimum length because number of cycles are different due to processing time.
             achieved_percentages.append(achieved_percentage[0:minimum_cycle_number])
             feedbacks.append(feedback[0:minimum_cycle_number])
             difference_ratios.append(difference_ratio[0:minimum_cycle_number])
+            variances.append(variance)
+            standard_deviations.append(standard_deviation)
             csvfile.close()
 
         # Start analyzing
@@ -104,6 +118,15 @@ if __name__ == '__main__':
         print("running_times: \n%s" % running_times)
         avg_running_times = sum(running_times) / len(running_times)
         print("Average Running Time: %s " % avg_running_times)
+
+        # --------- Variance and standard deviation
+        print("variances: \n%s" % variances)
+        avg_variance = sum(variances) / len(variances)
+        print("Average variances: %s " % avg_variance)
+
+        print("standard_deviations: \n%s" % standard_deviations)
+        avg_standard_deviation = sum(standard_deviations) / len(standard_deviations)
+        print("Average standard deviation: %s " % avg_standard_deviation)
 
         # --------- Achieved percentages
         print("Length of achieved_percentages: %s" % len(achieved_percentages))
@@ -173,7 +196,9 @@ if __name__ == '__main__':
                     [time_list[idx], avg_achieved_percentages[idx], percentage_setpoint_list[idx], avg_feedbacks[idx],
                      avg_difference_ratios[idx]])
 
-            writer.writerow([avg_running_times])
+            writer.writerow([avg_running_times, minimum_cycle_number, avg_running_times/minimum_cycle_number])
+            writer.writerow([avg_variance])
+            writer.writerow([avg_standard_deviation])
 
         csvfile.close()
 
@@ -294,3 +319,4 @@ if __name__ == '__main__':
 #         # calc average of all cycle
 #
 #     scenario_no += 1
+
