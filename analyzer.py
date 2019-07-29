@@ -47,7 +47,7 @@ if __name__ == '__main__':
     directory = os.path.join('.', 'data')
 
     scenario_no = 1
-    total_scenarios = 1
+    total_scenarios = 4
 
     while scenario_no <= total_scenarios:
         filename_format = str(scenario_no) + "-*"
@@ -101,8 +101,8 @@ if __name__ == '__main__':
                     else:
                         arr = ', '.join(row).split(',')
                         achieved_percentage.append(float(arr[1]))
-                        feedback.append(float(arr[3]))
-                        difference_ratio.append(float(arr[4]))
+                        feedback.append(float(arr[4]))
+                        difference_ratio.append(float(arr[5]))
                         line_number += 1
 
             # split a list based on minimum length because number of cycles are different due to processing time.
