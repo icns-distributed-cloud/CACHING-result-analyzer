@@ -85,6 +85,7 @@ if __name__ == '__main__':
         running_times = []
         achieved_percentages = []
         feedbacks = []
+        outputs = []
         difference_ratios = []
         variances = []
         standard_deviations = []
@@ -95,6 +96,7 @@ if __name__ == '__main__':
             line_number = 1
             achieved_percentage = []
             feedback = []
+            output = []
             difference_ratio = []
             variance = None
             standard_deviation = None
@@ -115,12 +117,14 @@ if __name__ == '__main__':
                         arr = ', '.join(row).split(',')
                         achieved_percentage.append(float(arr[1]))
                         feedback.append(float(arr[4]))
+                        output.append(float(arr[2]))
                         difference_ratio.append(float(arr[5]))
                         line_number += 1
 
             # split a list based on minimum length because number of cycles are different due to processing time.
             achieved_percentages.append(achieved_percentage[0:minimum_cycle_number])
             feedbacks.append(feedback[0:minimum_cycle_number])
+            outputs.append(output[0:minimum_cycle_number])
             difference_ratios.append(difference_ratio[0:minimum_cycle_number])
             variances.append(variance)
             standard_deviations.append(standard_deviation)
@@ -175,6 +179,23 @@ if __name__ == '__main__':
         print("Length of avg_achieved_percentages: %s" % len(avg_feedbacks))
         print("Average Achieved Percentages: \n%s" % avg_feedbacks)
 
+        # --------- Outputs
+        print("Length of outputs: %s" % len(outputs))
+        print("Outputs: \n%s" % outputs)
+
+        # !IMPORTANCE, np.transpose does NOT work on for a jagged list of different lengths.
+        transposed_f = np.transpose(outputs)
+        print("Length of transposed: %s" % len(transposed_f))
+        print("Transposed: \n%s" % transposed_f)
+
+        avg_outputs = []
+
+        for values in transposed_f:
+            avg_outputs.append(sum(values) / len(values))
+
+        print("Length of avg_achieved_percentages: %s" % len(avg_outputs))
+        print("Average Achieved Percentages: \n%s" % avg_outputs)
+
         # --------- difference_ratios
         print("Length of difference_ratios: %s" % len(difference_ratios))
         print("difference_ratios: \n%s" % difference_ratios)
@@ -206,8 +227,8 @@ if __name__ == '__main__':
             # print data
             for idx in range(minimum_cycle_number):
                 writer.writerow(
-                    [time_list[idx], avg_achieved_percentages[idx], percentage_setpoint_list[idx], avg_feedbacks[idx],
-                     avg_difference_ratios[idx]])
+                    [time_list[idx], avg_achieved_percentages[idx], (avg_outputs[idx] / (5 << 20) * 100),
+                     percentage_setpoint_list[idx], avg_feedbacks[idx], avg_difference_ratios[idx]])
 
             writer.writerow([avg_running_times, minimum_cycle_number, avg_running_times/minimum_cycle_number])
             writer.writerow([avg_variance])
